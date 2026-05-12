@@ -3,8 +3,8 @@
 ## Portada
 - **Nombre del Proyecto:** RapidGo
 - **Materia:** Cloud Computing
-- **Estudiantes:** [Nombres de los estudiantes]
-- **Docente:** [Nombre del docente]
+- **Estudiantes:** Diego Alejandro Barrios, Andrés Camilo Diaz, Jose Alejandro Colorado
+- **Docente:** Julián David Flórez Sánchez
 - **Institución:** Tecnológico de Antioquia (TdeA)
 
 ---
@@ -12,8 +12,22 @@
 ## 1. Modelo C4
 
 ### 1.1 Diagrama C1 - Contexto
-El sistema RapidGo como caja negra, interactuando con actores (cliente, repartidor, administrador) y sistemas externos (app móvil, pasarela de pagos, FCM, APNs).
+Este diagrama representa la arquitectura de RapidGo en su nivel más alto de abstracción. El backend serverless se modela como un sistema central aislado (caja negra) para ilustrar explícitamente sus límites y las interacciones con las entidades externas al modelo de dominio.
 
+**Elementos clave del diagrama:**
+
+* **Sistema Central:** Sistema RapidGo (nueva arquitectura Cloud).
+* **Actores Operativos:** 
+  * **Cliente:** Actor que inyecta la demanda transaccional (creación y monitoreo de pedidos).
+  * **Repartidor:** Actor logístico que consume y actualiza los estados de entrega.
+  * **Administrador:** Actor con privilegios de supervisión sobre la plataforma.
+* **Dependencias de Software Externas:**
+  * **App Móvil:** Cliente Frontend (React Native) que actúa como interfaz de usuario consumiendo la API de RapidGo.
+  * **Pasarela de Pagos:** Servicio de terceros requerido para la autorización y captura de transacciones.
+  * **FCM / APNs:** Proveedores de infraestructura externa (Google y Apple) utilizados para el enrutamiento y entrega de notificaciones push asíncronas hacia los dispositivos finales.
+
+#### C1
+![C1](assets/images/C1.svg)
 ![Diagrama C1](assets/C1.drawio)
 
 ### 1.2 Diagrama C2 - Contenedores
