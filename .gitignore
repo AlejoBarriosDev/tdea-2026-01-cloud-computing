@@ -1,0 +1,16 @@
+# Azure Functions / Local environment
+local.settings.json
+.env
+
+# Node.js
+node_modules/
+dist/
+build/
+
+# Draw.io y copias de seguridad
+*.bkp
+
+# Editor y OS
+.vscode/
+.DS_Store
+Thumbs.db
