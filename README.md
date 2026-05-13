@@ -15,33 +15,34 @@
 Este diagrama representa la arquitectura de RapidGo en su nivel más alto de abstracción. El backend serverless se modela como un sistema central aislado (caja negra) para ilustrar explícitamente sus límites y las interacciones con las entidades externas al modelo de dominio.
 
 **Elementos clave del diagrama:**
+- **Sistema Central:** Sistema RapidGo (nueva arquitectura Cloud).
+- **Actores Operativos:**
+  - **Cliente:** Actor que inyecta la demanda transaccional (creación y monitoreo de pedidos).
+  - **Repartidor:** Actor logístico que consume y actualiza los estados de entrega.
+  - **Administrador:** Actor con privilegios de supervisión sobre la plataforma.
+- **Dependencias de Software Externas:**
+  - **App Móvil:** Cliente Frontend (React Native) que actúa como interfaz de usuario consumiendo la API de RapidGo.
+  - **Pasarela de Pagos:** Servicio de terceros requerido para la autorización y captura de transacciones.
+  - **FCM / APNs:** Proveedores de infraestructura externa (Google y Apple) utilizados para el enrutamiento y entrega de notificaciones push asíncronas hacia los dispositivos finales.
 
-* **Sistema Central:** Sistema RapidGo (nueva arquitectura Cloud).
-* **Actores Operativos:** 
-  * **Cliente:** Actor que inyecta la demanda transaccional (creación y monitoreo de pedidos).
-  * **Repartidor:** Actor logístico que consume y actualiza los estados de entrega.
-  * **Administrador:** Actor con privilegios de supervisión sobre la plataforma.
-* **Dependencias de Software Externas:**
-  * **App Móvil:** Cliente Frontend (React Native) que actúa como interfaz de usuario consumiendo la API de RapidGo.
-  * **Pasarela de Pagos:** Servicio de terceros requerido para la autorización y captura de transacciones.
-  * **FCM / APNs:** Proveedores de infraestructura externa (Google y Apple) utilizados para el enrutamiento y entrega de notificaciones push asíncronas hacia los dispositivos finales.
-
-#### C1
 ![C1](assets/images/C1.svg)
-![Diagrama C1](assets/C1.drawio)
+[Diagrama C1](assets/C4_Diagrams.drawio)
 
 ### 1.2 Diagrama C2 - Contenedores
-*(Reemplazar con el diagrama C2)*
+Este diagrama expone la arquitectura interna del backend de RapidGo, reemplazando el monolito anterior por una arquitectura Serverless en Microsoft Azure orientada a alta disponibilidad, tolerancia a fallos y pago por uso.
 
-Contenedores identificados:
-- **API Management:** Punto de entrada único para la app móvil. Gestiona autenticación, throttling y versionado.
-- **Azure Functions:** Lógica de negocio (registrar pedidos, actualizar estados, consultar historial).
-- **Cosmos DB:** Persistencia de pedidos, usuarios y estados de entrega.
-- **Blob Storage:** Fotos de comprobantes de entrega e imágenes.
-- **Notification Hubs:** Notificaciones push en tiempo real.
+**Componentes principales:**
+- **Azure API Management:** Actúa como API Gateway y fachada para los clientes móviles, centralizando la seguridad (validación JWT) y protegiendo el sistema de sobrecargas mediante políticas de throttling.
+- **Azure Functions:** Contenedor de procesamiento stateless que aloja la lógica de negocio escrita en Node.js o Python. Maneja elásticamente la concurrencia en los picos de demanda sin intervención manual.
+- **Azure Cosmos DB:** Repositorio de datos NoSQL que sustituye al esquema relacional rígido anterior. Permite guardar la información de pedidos de forma documental, facilitando el registro de atributos variables.
+- **Azure Blob Storage:** Destino de almacenamiento para objetos binarios pesados (imágenes y comprobantes).
+- **Azure Notification Hubs:** Servicio de mensajería responsable del broadcasting e inserción unificada de notificaciones hacia Apple (APNs) y Google (FCM), resolviendo la baja tasa de entrega del sistema legado.  
+
+![C2](assets/images/C2.svg)
+[Diagrama C2](assets/C4_Diagrams.drawio)
 
 ### 1.3 Diagrama C3 - Componentes
-*(Reemplazar con el diagrama C3)*
+*(Pendiente diagrama C3)*
 
 Componentes internos de las Azure Functions:
 - `registrarPedido`
