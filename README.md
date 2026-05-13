@@ -59,44 +59,86 @@ Este diagrama detalla la arquitectura interna del contenedor de Azure Functions,
 ## 2. Decisiones Arquitectónicas (ADRs)
 
 ### ADR-01: Azure Functions vs App Service para la lógica de negocio
-- **Contexto:** El equipo de infraestructura consta de una sola persona, por lo que se requiere minimizar la administración de servidores. Además, la carga de la aplicación puede variar, y el proyecto busca aprovechar el "free tier" (Consumption Plan).
-- **Alternativas evaluadas:** 
-  1. Azure Functions (Serverless).
-  2. Azure App Service (PaaS).
-- **Decisión:** [Completar decisión justificada]
-- **Consecuencias:** [Completar ventajas obtenidas y trade-offs asumidos]
+
+-**Contexto**: La plataforma sufre variaciones drásticas de tráfico (picos de 4.500 pedidos y valles con 4% de uso de CPU). El presupuesto piloto es menor a $50 USD. El equipo de infraestructura consta de una sola persona, por lo que se requiere minimizar la administración de servidores. Los lenguajes dominados son Node.js y Python.
+
+-**Alternativas evaluadas**: 
+1. Azure Functions en Consumption Plan (Serverless). 
+2. Azure App Service (PaaS).
+
+-**Decisión**: Se elige Azure Functions en Consumption Plan. 
+-**Justificación técnica y de negocio**: Permite el escalado automático de 0 a N instancias sin intervención humana, soportando los picos de demanda. Al cobrar solo por tiempo de ejecución, elimina el costo fijo de $4.200.000 COP y encaja en el presupuesto piloto gracias al millón de ejecuciones gratuitas. Se implementará en Node.js o Python respetando el stack del equipo.
+
+-**Consecuencias**:
+    - **Ventajas**: 
+        - Reducción drástica de costos operativos y de infraestructura. 
+        - Despliegues zero-downtime nativos.
+    - **Trade-offs**: 
+        - Riesgo de cold starts (arranques en frío) tras períodos de inactividad, lo cual es asumible dado que el objetivo de latencia P95 es < 800ms.
 
 ### ADR-02: Cosmos DB vs Azure SQL Database para la persistencia de pedidos
-- **Contexto:** Se requiere flexibilidad para los atributos variables según el tipo de negocio.
-- **Alternativas evaluadas:**
-  1. Azure Cosmos DB (NoSQL).
-  2. Azure SQL Database (Relacional).
-- **Decisión:** [Completar decisión justificada]
-- **Consecuencias:** [Completar ventajas obtenidas y trade-offs asumidos]
+
+-**Contexto**: La base de datos actual es MySQL (relacional) con 3 años de histórico. Sin embargo, el negocio requiere un modelo flexible para manejar atributos variables por tipo de comercio. Se debe mantener el presupuesto controlado usando capas gratuitas. La región debe ser Brazil South o East US por latencia.
+
+-**Alternativas evaluadas**:
+1. Azure Cosmos DB (API for NoSQL).
+2. Azure SQL Database (Relacional).
+
+-**Decisión**: Se elige Azure Cosmos DB.
+-**Justificación**: A pesar de la restricción de tener datos históricos en MySQL, se decide realizar un cambio de paradigma hacia NoSQL porque el modelo documental (JSON) resuelve el problema de los atributos variables sin esquemas rígidos. Adicionalmente, el Free Tier (1.000 RU/s y 25 GB) cubre los requerimientos del piloto sin costo.
+
+-**Consecuencias**:
+    - **Ventajas**: Alta disponibilidad inmediata, esquema dinámico ideal para los pedidos, sin costo inicial.
+    - **Trade-offs**: Requiere un proceso de migración de datos (ETL) desde MySQL hacia Cosmos DB, asumiendo una deuda técnica temporal durante la transformación de los 3 años de datos históricos.
 
 ### ADR-03: API Management vs exposición directa de las Functions
-- **Contexto:** Se necesita gestionar la autenticación JWT, limitar las peticiones por usuario (throttling) y controlar el versionado de la API móvil existente.
-- **Alternativas evaluadas:**
-  1. Azure API Management.
-  2. Exposición directa de Azure Functions usando function keys.
-- **Decisión:** [Completar decisión justificada]
-- **Consecuencias:** [Completar ventajas obtenidas y trade-offs asumidos]
+
+-**Contexto**: La autenticación JWT actual es artesanal. Se requiere gestionar validación de tokens, limitar peticiones por usuario (throttling) y, fundamentalmente, mantener la compatibilidad exacta de los contratos de la API para no tener que rediseñar la App Móvil en React Native.
+
+-**Alternativas evaluadas**:
+    1. Azure API Management (Developer tier).
+    2. Exposición directa de Azure Functions (usando function keys u oAuth).
+
+-**Decisión**: Se elige Azure API Management.
+
+-**Justificación**: Centraliza la validación JWT y el throttling, descargando esta responsabilidad del código de las Functions. Permite usar políticas de transformación de requests/responses para asegurar que los contratos de la API coincidan exactamente con lo que espera la app móvil actual, cumpliendo la restricción de no tocar el Frontend.
+
+-**Consecuencias**:
+    - **Ventajas**: Desacoplamiento de la seguridad, protección contra sobrecargas, compatibilidad garantizada con la app móvil.
+    - **Trade-offs**: El nivel Developer no cuenta con SLA de producción. Deberá migrarse al nivel Basic o Standard post-piloto, incrementando los costos.
 
 ### ADR-04: Blob Storage vs Azure Files para almacenamiento de archivos
-- **Contexto:** Es necesario guardar fotos de comprobantes de entrega, imágenes de productos y exports. Se busca la opción de menor costo para objetos no estructurados.
-- **Alternativas evaluadas:**
-  1. Azure Blob Storage.
-  2. Azure Files.
-- **Decisión:** [Completar decisión justificada]
-- **Consecuencias:** [Completar ventajas obtenidas y trade-offs asumidos]
+
+-**Contexto**: Es necesario guardar fotos de comprobantes de entrega, imágenes de productos y exports de reportes. Se busca la opción de menor costo para objetos no estructurados.
+
+-**Alternativas evaluadas**:
+
+    1. Azure Blob Storage (LRS Standard).
+    2. Azure Files.
+
+-**Decisión**: Se elige Azure Blob Storage (LRS Standard).
+
+-**Justificación**: Blob Storage está optimizado específicamente para el almacenamiento masivo de datos no estructurados (imágenes, reportes) al menor costo posible. No se requiere la semántica de un sistema de archivos tradicional (SMB/NFS) que ofrece Azure Files.
+
+-**Consecuencias**:
+    - **Ventajas**: Costo mínimo por GB de almacenamiento, integración nativa y directa mediante el SDK en Azure Functions.
+    - **Trade-offs**: Los archivos no pueden ser montados directamente como un disco en un sistema operativo, lo cual no es necesario para esta arquitectura stateless.
 
 ### ADR-05: Notification Hubs vs Azure Communication Services para notificaciones push
-- **Contexto:** Se necesita notificar en tiempo real a dispositivos Android (FCM) e iOS (APNs) sobre el cambio de estado de los pedidos, maximizando el free tier.
-- **Alternativas evaluadas:**
-  1. Azure Notification Hubs.
-  2. Azure Communication Services.
-- **Decisión:** [Completar decisión justificada]
-- **Consecuencias:** [Completar ventajas obtenidas y trade-offs asumidos]
+
+-**Contexto**: El sistema actual tiene una tasa de entrega del 67%. Se requiere notificar en tiempo real a dispositivos Android (FCM) e iOS (APNs) sobre el cambio de estado de los pedidos, con un objetivo de entrega > 95% y maximizando el uso de capas gratuitas.
+
+-**Alternativas evaluadas**:
+    1. Azure Notification Hubs.
+    2. Gestión manual desde Azure Functions conectándose a las APIs de FCM y APNs.
+
+-**Decisión**: Se elige Azure Notification Hubs.
+
+-**Justificación**: Actúa como un motor de orquestación unificado que abstrae la complejidad de comunicarse con APNs y FCM por separado, resolviendo los problemas de entrega del sistema legado. El Free tier cubre 1 millón de notificaciones mensuales, ajustándose al presupuesto.
+
+-**Consecuencias**:
+    - **Ventajas**: Cumplimiento de la métrica de entrega > 95%, envío unificado multiplataforma, descarga de procesamiento a las Functions.
+    - **Trade-offs**: Requiere refactorizar la lógica en la App Móvil (React Native) para registrar los identificadores de dispositivos (tokens) contra Notification Hubs en lugar del backend legado.
 
 ---
 
