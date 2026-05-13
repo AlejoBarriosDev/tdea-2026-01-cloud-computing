@@ -42,13 +42,17 @@ Este diagrama expone la arquitectura interna del backend de RapidGo, reemplazand
 [Diagrama C2](assets/C4_Diagrams.drawio)
 
 ### 1.3 Diagrama C3 - Componentes
-*(Pendiente diagrama C3)*
+Este diagrama detalla la arquitectura interna del contenedor de Azure Functions, exponiendo los componentes individuales responsables de ejecutar las reglas de negocio de RapidGo, procesar pagos y orquestar notificaciones.
 
-Componentes internos de las Azure Functions:
-- `registrarPedido`
-- `actualizarEstado`
-- `consultarHistorial`
-- `notificarCliente`
+**Componentes principales e interacciones:**
+- **`registrarPedido` (HTTP Trigger):** Controlador que recibe el tráfico POST /pedidos validado desde API Management. Orquesta el flujo inicial: solicita la autorización de cobro al componente `procesarPago` e inserta el documento del pedido confirmado en Azure Cosmos DB mediante su SDK.
+- **`consultarHistorial` (HTTP Trigger):** Endpoint de lectura expuesto para peticiones GET /pedidos. Se conecta a Azure Cosmos DB para recuperar y retornar las colecciones de pedidos asociadas al usuario.
+- **`actualizarEstado` (HTTP Trigger):** Controlador logístico que procesa peticiones PUT /pedidos/{id}. Actualiza el estado del documento en Cosmos DB, carga las fotos de comprobantes de entrega hacia Azure Blob Storage y desencadena la ejecución del componente `notificarCliente`.
+- **`procesarPago` (Internal Service):** Componente de integración interno que aísla la comunicación transaccional. Realiza peticiones JSON/HTTP hacia el sistema de software externo de la Pasarela de Pagos para efectuar los cobros.
+- **`notificarCliente` (Internal Helper):** Servicio auxiliar invocado internamente tras la actualización de un estado. Construye el payload push y utiliza el Azure SDK para delegar el envío del mensaje al orquestador Azure Notification Hubs.
+
+![C3](assets/images/C3.svg)
+[Diagrama C3](assets/C4_Diagrams.drawio)
 
 ---
 
