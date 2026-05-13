@@ -60,21 +60,21 @@ Este diagrama detalla la arquitectura interna del contenedor de Azure Functions,
 
 ### ADR-01: Azure Functions vs App Service para la lógica de negocio
 
--**Contexto**: La plataforma sufre variaciones drásticas de tráfico (picos de 4.500 pedidos y valles con 4% de uso de CPU). El presupuesto piloto es menor a $50 USD. El equipo de infraestructura consta de una sola persona, por lo que se requiere minimizar la administración de servidores. Los lenguajes dominados son Node.js y Python.
+* **Contexto**: La plataforma sufre variaciones drásticas de tráfico (picos de 4.500 pedidos y valles con 4% de uso de CPU). El presupuesto piloto es menor a $50 USD. El equipo de infraestructura consta de una sola persona, por lo que se requiere minimizar la administración de servidores. Los lenguajes dominados son Node.js y Python.
 
--**Alternativas evaluadas**: 
+* **Alternativas evaluadas**: 
 1. Azure Functions en Consumption Plan (Serverless). 
 2. Azure App Service (PaaS).
 
--**Decisión**: Se elige Azure Functions en Consumption Plan. 
--**Justificación técnica y de negocio**: Permite el escalado automático de 0 a N instancias sin intervención humana, soportando los picos de demanda. Al cobrar solo por tiempo de ejecución, elimina el costo fijo de $4.200.000 COP y encaja en el presupuesto piloto gracias al millón de ejecuciones gratuitas. Se implementará en Node.js o Python respetando el stack del equipo.
+* **Decisión**: Se elige Azure Functions en Consumption Plan. 
+* **Justificación técnica y de negocio**: Permite el escalado automático de 0 a N instancias sin intervención humana, soportando los picos de demanda. Al cobrar solo por tiempo de ejecución, elimina el costo fijo de $4.200.000 COP y encaja en el presupuesto piloto gracias al millón de ejecuciones gratuitas. Se implementará en Node.js o Python respetando el stack del equipo.
 
--**Consecuencias**:
-    - **Ventajas**: 
-        - Reducción drástica de costos operativos y de infraestructura. 
-        - Despliegues zero-downtime nativos.
-    - **Trade-offs**: 
-        - Riesgo de cold starts (arranques en frío) tras períodos de inactividad, lo cual es asumible dado que el objetivo de latencia P95 es < 800ms.
+* **Consecuencias**: 
+    * **Ventajas**: 
+        * Reducción drástica de costos operativos y de infraestructura. 
+        * Despliegues zero-downtime nativos.
+    * **Trade-offs**: 
+        * Riesgo de cold starts (arranques en frío) tras períodos de inactividad, lo cual es asumible dado que el objetivo de latencia P95 es < 800ms.
 
 ### ADR-02: Cosmos DB vs Azure SQL Database para la persistencia de pedidos
 
