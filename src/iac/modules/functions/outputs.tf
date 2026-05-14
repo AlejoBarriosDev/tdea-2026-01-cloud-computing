@@ -1,0 +1,3 @@
+output "default_hostname" {
+  value = azurerm_linux_function_app.func_app.default_hostname
+}
