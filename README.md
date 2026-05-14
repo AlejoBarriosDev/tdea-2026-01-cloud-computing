@@ -147,15 +147,15 @@ Este diagrama detalla la arquitectura interna del contenedor de Azure Functions,
 A continuación, se documentarán las evidencias visuales (capturas de pantalla) del funcionamiento de extremo a extremo:
 
 1. **Grupo de recursos en Azure:**
-   *(Insertar captura con los 5 servicios desplegados)*
+   *(TODO)*
 2. **Logs de ejecución exitosa:**
-   *(Insertar captura de logs de las Functions en el Portal de Azure)*
+   *(TODO)*
 3. **Documento en Cosmos DB:**
-   *(Insertar captura mostrando la estructura JSON del pedido)*
+   *(TODO)*
 4. **Notificación enviada (Notification Hubs):**
-   *(Insertar captura de la prueba o envío simulado)*
+   *(TODO)*
 5. **Pruebas de la API:**
-   *(Colección de Postman exportada en `/src/` con las llamadas documentadas y/o capturas de respuesta exitosa)*
+   *(TODO)*
 
 ---
 
