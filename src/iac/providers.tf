@@ -19,7 +19,7 @@ provider "azurerm" {
   # (por ejemplo, desde una Máquina Virtual de Azure o Azure Cloud Shell).
   # Como estás ejecutando esto desde tu computador local, Terraform buscará la IP interna de Azure y fallará.
   # Para ejecutarlo localmente, Terraform usará automáticamente tu sesión de 'az login'.
-  
+
   # use_msi = true
   # client_id = var.managed_identity_client_id
 

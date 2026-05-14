@@ -160,4 +160,14 @@ A continuación, se documentarán las evidencias visuales (capturas de pantalla)
 ---
 
 ## 4. Conclusiones
-[Escribir las conclusiones finales del proyecto, hallazgos, retos presentados y lecciones aprendidas]
+
+Durante el diseño y ejecución del piloto serverless de RapidGo, se identificaron y superaron importantes retos técnicos que definen las mejores prácticas para futuros despliegues:
+
+1. **Restricciones de Suscripción para la IaC:** 
+   Debido a las limitaciones inherentes de una suscripción de estudiante (Azure for Students), la implementación de Infraestructura como Código mediante Terraform no pudo realizarse con un `Service Principal` tradicional. Esto forzó a utilizar la sesión local autenticada directamente o una `Managed Identity` (identidad administrada) para la ejecución segura del despliegue, demostrando adaptabilidad en entornos con permisos restringidos.
+
+2. **Manejo de Capacidad y Latencia en Capa Gratuita (Free Tier):** 
+   Se experimentaron errores de `ServiceUnavailable` al intentar provisionar **Azure Cosmos DB** (Free Tier) con redundancia de zona (Availability Zones) en la región **East US**. La limitación de capacidad física para recursos gratuitos obligó a desactivar la redundancia de zona (`zone_redundant = false`) y a explorar regiones alternas como `East US 2` o `Brazil South`. Esto resalta la importancia de equilibrar el ahorro de costos frente a la posible penalidad de latencia al ubicar servicios interdependientes (Functions y DB) en diferentes datacenters.
+
+3. **Gestión de Secretos sin Alterar la Arquitectura (Key Vault):**
+   A pesar de la necesidad de inyectar credenciales sensibles (como los certificados y llaves para FCM/APNs en Notification Hubs), se decidió **no implementar Azure Key Vault**. La inclusión de Key Vault habría agregado complejidad operativa al piloto y modificado la estructura C2/C3 ya definida y aprobada. Como mitigación segura, se utilizaron variables marcadas como sensibles (`sensitive = true`) nativas en Terraform, logrando que los secretos se pasen e inyecten de forma segura a las variables de entorno de Azure Functions durante el despliegue sin quemarlas en el código fuente.
