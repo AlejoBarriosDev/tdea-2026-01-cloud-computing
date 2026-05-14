@@ -147,7 +147,8 @@ Este diagrama detalla la arquitectura interna del contenedor de Azure Functions,
 A continuación, se documentarán las evidencias visuales (capturas de pantalla) del funcionamiento de extremo a extremo:
 
 1. **Grupo de recursos en Azure:**
-   *(TODO)*
+   ![Grupo de recursos en Azure](/assets/images/resource-group.jpg)
+   ![Recursos Azure](/assets/images/resources.jpg)
 2. **Logs de ejecución exitosa:**
    *(TODO)*
 3. **Documento en Cosmos DB:**
