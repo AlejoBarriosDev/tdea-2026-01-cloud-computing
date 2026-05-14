@@ -1,11 +1,15 @@
 terraform {
+  cloud {
+    organization = "me-alejobarrios-dev"
+
+    workspaces {
+      name = "tdea-2026-01-cloud-computing"
+    }
+  }
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.0" # Puedes ajustar la versión según sea necesario
-    }
-    random = {
-      source  = "hashicorp/random"
       version = "~> 3.0"
     }
   }
@@ -15,10 +19,9 @@ provider "azurerm" {
   features {}
 
   # --- NOTA IMPORTANTE PARA EJECUCIÓN LOCAL ---
-  # El uso de 'use_msi = true' solo funciona si ejecutas Terraform DESDE adentro de Azure 
+  # El uso de 'use_msi = true' es exclusivo para ejecuciones desde adentro de Azure 
   # (por ejemplo, desde una Máquina Virtual de Azure o Azure Cloud Shell).
-  # Como estás ejecutando esto desde tu computador local, Terraform buscará la IP interna de Azure y fallará.
-  # Para ejecutarlo localmente, Terraform usará automáticamente tu sesión de 'az login'.
+  # Para ejecuciones locales, Terraform utilizará automáticamente las credenciales de la CLI ('az login').
 
   # use_msi = true
   # client_id = var.managed_identity_client_id

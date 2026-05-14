@@ -32,12 +32,10 @@ variable "fcm_api_key" {
   type        = string
   description = "Firebase Cloud Messaging API Key"
   sensitive   = true
-  default     = "dummy_fcm_key_replace_later"
 }
 
 variable "apns_certificate" {
   type        = string
   description = "Apple Push Notification Service Certificate"
   sensitive   = true
-  default     = "dummy_apns_cert_replace_later"
 }
