@@ -9,8 +9,13 @@ build/
 
 # Draw.io y copias de seguridad
 *.bkp
+*.tfstate*
+*.tfvars*
+*.terraform*
+
 
 # Editor y OS
 .vscode/
+.terraform/
 .DS_Store
 Thumbs.db
