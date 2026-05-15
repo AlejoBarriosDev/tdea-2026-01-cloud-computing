@@ -39,3 +39,9 @@ variable "apns_certificate" {
   description = "Apple Push Notification Service Certificate"
   sensitive   = true
 }
+
+variable "jwt_secret" {
+  type        = string
+  description = "Secreto compartido utilizado para firmar y validar los tokens JWT"
+  sensitive   = true
+}

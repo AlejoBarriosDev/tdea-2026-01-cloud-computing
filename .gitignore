@@ -24,6 +24,7 @@ terraform.rc
 local.settings.json
 .env
 .funcignore
+.antigravityrules
 
 # Node.js
 node_modules/
@@ -38,6 +39,7 @@ yarn-error.log*
 
 # Editor y OS
 .vscode/
+.agents/
 .idea/
 .DS_Store
 Thumbs.db

@@ -12,3 +12,9 @@ variable "function_default_hostname" {
   description = "The default hostname of the Azure Function App"
   type        = string
 }
+
+variable "jwt_secret" {
+  description = "JWT Secret for API Management validation"
+  type        = string
+  sensitive   = true
+}
