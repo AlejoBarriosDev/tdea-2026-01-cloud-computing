@@ -1,0 +1,167 @@
+{
+  "info": {
+    "_postman_id": "a0f158f7-f2cb-431e-a54d-1673dff186df",
+    "name": "RapidGo Serverless API",
+    "description": "Colección de Postman para el backend serverless de RapidGo. Incluye las rutas para registrar un pedido, consultar historial y actualizar el estado, como fue definido en la arquitectura C4 y el caso de estudio.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Pedidos",
+      "description": "Endpoints relacionados con la gestión de pedidos",
+      "id": "a9d4663f-0488-43bd-a34d-395d28b7989d",
+      "item": [
+        {
+          "name": "1. Registrar Pedido (registrarPedido)",
+          "id": "377e9f96-96cf-4c16-a3b1-6fac9c09151e",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": \"12345\",\n  \"items\": [\n    {\n      \"productoId\": \"A001\",\n      \"cantidad\": 2\n    }\n  ],\n  \"direccion\": \"Calle 123 #45-67\",\n  \"metodoPago\": \"tarjeta\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. Consultar Historial (consultarHistorial)",
+          "id": "4d88061e-65cd-4558-8d0e-7a96352c074e",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pedidos?clienteId=12345",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos"
+              ],
+              "query": [
+                {
+                  "key": "clienteId",
+                  "value": "12345"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. Actualizar Estado (actualizarEstado)",
+          "id": "b4fd3229-41b7-40e1-86f9-47638236bac1",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"en camino\",\n  \"repartidorId\": \"R-999\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwtToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Generación automática de JWT para pruebas de API Management",
+          "var header = {",
+          "    \"alg\": \"HS256\",",
+          "    \"typ\": \"JWT\"",
+          "};",
+          "var payload = {",
+          "    \"sub\": \"12345\",",
+          "    \"name\": \"RapidGo Test User\",",
+          "    \"exp\": Math.floor(Date.now() / 1000) + 3600 // Expira en 1 hora",
+          "};",
+          "var secret = pm.collectionVariables.get(\"jwtSecret\") || \"super-secret-key-rapidgo-2026\";",
+          "",
+          "// Función para codificar en Base64URL",
+          "function base64url(source) {",
+          "    var encodedSource = CryptoJS.enc.Base64.stringify(source);",
+          "    encodedSource = encodedSource.replace(/=+$/, '');",
+          "    encodedSource = encodedSource.replace(/\\+/g, '-');",
+          "    encodedSource = encodedSource.replace(/\\//g, '_');",
+          "    return encodedSource;",
+          "}",
+          "",
+          "var encodedHeader = base64url(CryptoJS.enc.Utf8.parse(JSON.stringify(header)));",
+          "var encodedPayload = base64url(CryptoJS.enc.Utf8.parse(JSON.stringify(payload)));",
+          "var signature = CryptoJS.HmacSHA256(encodedHeader + \".\" + encodedPayload, secret);",
+          "var encodedSignature = base64url(signature);",
+          "",
+          "var jwt = encodedHeader + \".\" + encodedPayload + \".\" + encodedSignature;",
+          "pm.collectionVariables.set(\"jwtToken\", jwt);",
+          "console.log(\"JWT generado automáticamente y asignado a la variable jwtToken\");"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://rapidgo-api.azure-api.net",
+      "description": "URL base de Azure API Management"
+    },
+    {
+      "key": "jwtSecret",
+      "value": "super-secret-key-rapidgo-2026",
+      "description": "Secreto utilizado para firmar el token JWT. Debe coincidir con la política de APIM."
+    },
+    {
+      "key": "jwtToken",
+      "value": "",
+      "description": "El token JWT que se auto-genera mediante el script Pre-request"
+    }
+  ]
+}
