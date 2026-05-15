@@ -19,7 +19,7 @@ variable "resource_group_name" {
 variable "managed_identity_client_id" {
   type        = string
   description = "Client ID de la User-Assigned Managed Identity"
-  default     = "42cc9824-4b09-4a38-8ff2-4ddfc31ba84c"
+  default     = "a9887b0f-7338-4080-8b8f-91aa45d4c18c"
 }
 
 variable "location" {
