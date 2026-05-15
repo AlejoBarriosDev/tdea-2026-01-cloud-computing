@@ -17,6 +17,10 @@ jobs:
     name: 'Terraform'
     runs-on: ubuntu-latest
     environment: tdea-2026-01-cloud-computing
+    env:
+      TF_VAR_jwt_secret: ${{ secrets.TF_VAR_jwt_secret }}
+      TF_VAR_fcm_api_key: ${{ secrets.TF_VAR_fcm_api_key }}
+      TF_VAR_apns_certificate: ${{ secrets.TF_VAR_apns_certificate }}
     defaults:
       run:
         working-directory: ./src/iac
