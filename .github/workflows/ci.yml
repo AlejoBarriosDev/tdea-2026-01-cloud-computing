@@ -16,6 +16,7 @@ jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
+    environment: tdea-2026-01-cloud-computing
     defaults:
       run:
         working-directory: ./src/iac
