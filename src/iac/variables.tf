@@ -25,7 +25,7 @@ variable "managed_identity_client_id" {
 variable "location" {
   type        = string
   description = "Ubicación de los recursos en Azure"
-  default     = "eastus"
+  default     = "eastus2"
 }
 
 variable "fcm_api_key" {
