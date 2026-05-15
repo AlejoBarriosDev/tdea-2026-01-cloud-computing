@@ -12,7 +12,7 @@ module "storage" {
 module "cosmosdb" {
   source              = "./modules/cosmosdb"
   resource_group_name = data.azurerm_resource_group.rg.name
-  location            = var.location
+  location            = data.azurerm_resource_group.rg.location
 }
 
 module "notification_hubs" {
