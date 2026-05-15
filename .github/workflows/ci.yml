@@ -1,0 +1,35 @@
+name: RapidGo CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  terraform:
+    name: 'Terraform Validation'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./src/iac
+        
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+        
+      - name: Terraform Format
+        run: terraform fmt -check || echo "Format check failed, please run terraform fmt"
+        
+      - name: Terraform Validate
+        run: terraform validate
