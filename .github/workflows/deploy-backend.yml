@@ -1,0 +1,43 @@
+name: Deploy RapidGo Backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/backend/**'
+  workflow_dispatch:
+
+env:
+  AZURE_FUNCTIONAPP_NAME: 'func-rapidgo-backend'
+  PYTHON_VERSION: '3.11'
+  WORKING_DIRECTORY: 'src/backend'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 'Install dependencies and run tests'
+        shell: bash
+        run: |
+          pushd './${{ env.WORKING_DIRECTORY }}'
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # Ejecutar pruebas unitarias antes de desplegar
+          python -m unittest discover tests
+          popd
+
+      - name: 'Deploy to Azure Functions'
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+          package: './${{ env.WORKING_DIRECTORY }}'
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
