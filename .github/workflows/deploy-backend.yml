@@ -17,6 +17,7 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: tdea-2026-01-cloud-computing
     permissions:
       id-token: write
       contents: read
