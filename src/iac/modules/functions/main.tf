@@ -1,9 +1,9 @@
 resource "azurerm_service_plan" "func_plan" {
-  name                = "plan-rapidgo-functions"
+  name                = "ASP-serverlessbackendapplicationmob-81a0"
   resource_group_name = var.resource_group_name
   location            = var.location
   os_type             = "Linux"
-  sku_name            = "Y1" # Consumption Plan
+  sku_name            = "FC1" 
 }
 
 resource "azurerm_linux_function_app" "func_app" {

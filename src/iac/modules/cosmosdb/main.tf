@@ -5,7 +5,7 @@ resource "azurerm_cosmosdb_account" "cosmos" {
   offer_type          = "Standard"
   kind                = "GlobalDocumentDB"
 
-  free_tier_enabled = true
+  free_tier_enabled = false
 
   consistency_policy {
     consistency_level = "Session"
@@ -35,5 +35,5 @@ resource "azurerm_cosmosdb_sql_container" "pedidos" {
   account_name          = azurerm_cosmosdb_account.cosmos.name
   database_name         = azurerm_cosmosdb_sql_database.db.name
   partition_key_paths   = ["/id"]
-  partition_key_version = 1
+  partition_key_version = 2
 }
