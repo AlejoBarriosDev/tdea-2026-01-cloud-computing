@@ -37,14 +37,15 @@ resource "azurerm_api_management_api_policy" "rapidgo_policy" {
   api_management_name = azurerm_api_management_api.rapidgo_api.api_management_name
   resource_group_name = var.resource_group_name
 
+  # Forzamos dependencia del Named Value para evitar que la política se cree antes que el secreto
   xml_content = <<XML
 <policies>
   <inbound>
     <base />
-    <rate-limit calls="100" renewal-period="60" />
+    <rate-limit-by-key calls="100" renewal-period="60" counter-key="@(context.Request.IpAddress)" />
     <validate-jwt header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Unauthorized">
       <issuer-signing-keys>
-        <key base64-encoded="true">{{jwt-secret-key}}</key>
+        <key base64-encoded="true">{{${azurerm_api_management_named_value.jwt_secret.name}}}</key>
       </issuer-signing-keys>
     </validate-jwt>
   </inbound>

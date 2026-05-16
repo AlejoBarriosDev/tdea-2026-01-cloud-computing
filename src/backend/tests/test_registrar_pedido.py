@@ -18,8 +18,8 @@ class TestRegistrarPedido(unittest.TestCase):
         
         req = func.HttpRequest(
             method='POST',
-            body=json.dumps(pedido_data).encode('utf8'),
-            url='/api/pedidos'
+            url='/api/pedidos',
+            body=json.dumps(pedido_data).encode('utf8')
         )
 
         # Ejecutar función
@@ -36,8 +36,8 @@ class TestRegistrarPedido(unittest.TestCase):
     def test_registrar_pedido_missing_fields(self):
         req = func.HttpRequest(
             method='POST',
-            body=json.dumps({"clienteId": "12345"}).encode('utf8'),
-            url='/api/pedidos'
+            url='/api/pedidos',
+            body=json.dumps({"clienteId": "12345"}).encode('utf8')
         )
         resp = registrarPedido(req)
         self.assertEqual(resp.status_code, 400)
