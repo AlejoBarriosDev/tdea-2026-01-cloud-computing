@@ -12,8 +12,9 @@ class TestConsultarHistorial(unittest.TestCase):
         
         req = func.HttpRequest(
             method='GET',
+            url='/api/pedidos',
             params={'clienteId': '12345'},
-            url='/api/pedidos'
+            body=b''
         )
 
         resp = consultarHistorial(req)

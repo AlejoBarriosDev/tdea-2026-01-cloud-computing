@@ -10,9 +10,9 @@ class TestActualizarEstado(unittest.TestCase):
     def test_actualizar_estado_success(self, mock_cosmos_service):
         req = func.HttpRequest(
             method='PUT',
-            body=json.dumps({"estado": "entregado"}).encode('utf8'),
             url='/api/pedidos/p-123',
-            route_params={'id': 'p-123'}
+            route_params={'id': 'p-123'},
+            body=json.dumps({"estado": "entregado"}).encode('utf8')
         )
 
         resp = actualizarEstado(req)

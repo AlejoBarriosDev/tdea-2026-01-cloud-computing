@@ -2,6 +2,7 @@ import azure.functions as func
 import json
 import logging
 import uuid
+import datetime
 from services.cosmos_service import CosmosService
 from azure.cosmos import exceptions
 
@@ -26,7 +27,7 @@ def registrarPedido(req: func.HttpRequest) -> func.HttpResponse:
     # Enriquecer datos
     req_body["id"] = str(uuid.uuid4())
     req_body["estado"] = "pendiente"
-    req_body["fechaCreacion"] = func.datetime.datetime.utcnow().isoformat()
+    req_body["fechaCreacion"] = datetime.datetime.utcnow().isoformat()
 
     try:
         cosmos_service.crear_pedido(req_body)
