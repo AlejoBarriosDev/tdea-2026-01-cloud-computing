@@ -158,9 +158,21 @@ A continuación, se documentarán las evidencias visuales (capturas de pantalla)
 5. **Pruebas de la API:**
    *(TODO)*
 
+
 ---
 
-## 4. Conclusiones
+## 4. Guía de Despliegue Automatizado
+
+Para activar el ciclo de vida automatizado del backend, siga estos pasos:
+
+1. **Configurar Secretos en GitHub:**
+   - `AZURE_FUNCTIONAPP_PUBLISH_PROFILE`: Descarga el perfil de publicación desde el portal de Azure (Sección "Get publish profile" en la página principal de la Function App) y pégalo como secreto en GitHub con este nombre exacto. **(Indispensable para el despliegue automático)**.
+   - `JWT_SECRET`: Define una cadena de texto para la validación de tokens JWT en el API Gateway.
+2. **Push a `main`:** Cualquier cambio en `src/backend/` disparará el pipeline de CI/CD que ejecuta pruebas unitarias y despliega el código automáticamente.
+
+---
+
+## 5. Conclusiones
 
 Durante el diseño y ejecución del piloto serverless de RapidGo, se identificaron y superaron importantes retos técnicos que definen las mejores prácticas para futuros despliegues:
 
