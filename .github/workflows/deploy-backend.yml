@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
     paths:
       - 'src/backend/**'
   workflow_dispatch:
@@ -16,9 +17,20 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: tdea-2026-01-cloud-computing
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@v4
+
+      - name: 'Az CLI login'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v5
@@ -40,4 +52,3 @@ jobs:
         with:
           app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
           package: './${{ env.WORKING_DIRECTORY }}'
-          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}

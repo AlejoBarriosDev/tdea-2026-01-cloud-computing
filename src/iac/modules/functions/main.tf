@@ -15,9 +15,6 @@ resource "azurerm_linux_function_app" "func_app" {
   storage_account_access_key = var.storage_account_access_key
 
   site_config {
-    application_stack {
-      python_version = "3.11"
-    }
   }
 
   app_settings = {
@@ -27,7 +24,7 @@ resource "azurerm_linux_function_app" "func_app" {
     "NOTIFICATION_HUB_NAME"              = var.notification_hub_name
     "FCM_API_KEY"                        = var.fcm_api_key
     "APNS_CERTIFICATE"                   = var.apns_certificate
-    "FUNCTIONS_WORKER_RUNTIME"           = "python"
+    "DEPLOYMENT_STORAGE_CONNECTION_STRING" = var.blob_storage_connection_string
   }
 
   tags = {
