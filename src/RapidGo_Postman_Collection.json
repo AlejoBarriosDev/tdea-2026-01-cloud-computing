@@ -141,7 +141,8 @@
                   "",
                   "pm.test(\"Verify update message\", function () {",
                   "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData.mensaje).to.include(\"exitosamente\");",
+                  "    pm.expect(jsonData.mensaje).to.include(\"notificación enviada\");",
+                  "    pm.expect(jsonData.notificado).to.be.true;",
                   "});"
                 ],
                 "type": "text/javascript"

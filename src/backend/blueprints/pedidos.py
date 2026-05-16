@@ -4,10 +4,12 @@ import logging
 import uuid
 import datetime
 from services.cosmos_service import CosmosService
+from services.notification_service import NotificationService
 from azure.cosmos import exceptions
 
 pedidos_bp = func.Blueprint()
 cosmos_service = CosmosService()
+notification_service = NotificationService()
 
 @pedidos_bp.route(route="pedidos", methods=["POST"])
 def registrarPedido(req: func.HttpRequest) -> func.HttpResponse:
@@ -69,9 +71,19 @@ def actualizarEstado(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(json.dumps({"error": "estado requerido"}), status_code=400, mimetype="application/json")
 
     try:
-        cosmos_service.actualizar_estado_pedido(pedido_id, nuevo_estado, repartidor_id)
+        # 1. Actualizar en Base de Datos
+        pedido_actualizado = cosmos_service.actualizar_estado_pedido(pedido_id, nuevo_estado, repartidor_id)
+        
+        # 2. Notificar al cliente (Flujo Crítico Paso 5)
+        cliente_id = pedido_actualizado.get('clienteId', 'desconocido')
+        notification_service.notificar_cambio_estado(pedido_id, nuevo_estado, cliente_id)
+
         return func.HttpResponse(
-            json.dumps({"mensaje": "Actualizado exitosamente", "pedidoId": pedido_id}),
+            json.dumps({
+                "mensaje": "Actualizado exitosamente y notificación enviada", 
+                "pedidoId": pedido_id,
+                "notificado": True
+            }),
             status_code=200,
             mimetype="application/json"
         )
