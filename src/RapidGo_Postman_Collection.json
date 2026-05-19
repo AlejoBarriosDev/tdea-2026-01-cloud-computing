@@ -9,32 +9,29 @@
     {
       "name": "Pedidos",
       "description": "Endpoints relacionados con la gestión de pedidos",
-      "id": "a9d4663f-0488-43bd-a34d-395d28b7989d",
+      "id": "12798466-3927-4225-b078-213c3eb08def",
       "item": [
         {
           "name": "1. Registrar Pedido (registrarPedido)",
-          "id": "377e9f96-96cf-4c16-a3b1-6fac9c09151e",
+          "id": "a2e5d6a2-46e3-44b8-952c-e35343bbf572",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}",
+                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"clienteId\": \"12345\",\n  \"items\": [\n    {\n      \"productoId\": \"A001\",\n      \"cantidad\": 2\n    }\n  ],\n  \"direccion\": \"Calle 123 #45-67\",\n  \"metodoPago\": \"tarjeta\"\n}"
             },
-            "url": {
-              "raw": "{{baseUrl}}/pedidos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "pedidos"
-              ]
-            }
+            "url": "{{baseUrl}}/pedidos"
           },
           "event": [
             {
@@ -59,25 +56,17 @@
         },
         {
           "name": "2. Consultar Historial (consultarHistorial)",
-          "id": "4d88061e-65cd-4558-8d0e-7a96352c074e",
+          "id": "8c4290d2-bd16-404f-9226-de6785c1b36f",
           "request": {
             "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/pedidos?clienteId=12345",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "pedidos"
-              ],
-              "query": [
-                {
-                  "key": "clienteId",
-                  "value": "12345"
-                }
-              ]
-            }
+            "header": [
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/pedidos?clienteId=12345"
           },
           "event": [
             {
@@ -101,34 +90,25 @@
         },
         {
           "name": "3. Actualizar Estado (actualizarEstado)",
-          "id": "b4fd3229-41b7-40e1-86f9-47638236bac1",
+          "id": "bd042a40-a363-4612-ae6d-167384b98054",
           "request": {
             "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}",
+                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"estado\": \"en camino\",\n  \"repartidorId\": \"R-999\"\n}"
             },
-            "url": {
-              "raw": "{{baseUrl}}/pedidos/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "pedidos",
-                ":id"
-              ],
-              "variable": [
-                {
-                  "key": "id"
-                }
-              ]
-            }
+            "url": "{{baseUrl}}/pedidos/:id"
           },
           "event": [
             {
@@ -180,7 +160,7 @@
           "    \"name\": \"RapidGo Test User\",",
           "    \"exp\": Math.floor(Date.now() / 1000) + 3600 // Expira en 1 hora",
           "};",
-          "var secret = pm.collectionVariables.get(\"jwtSecret\") || \"super-secret-key-rapidgo-2026\";",
+          "var secret = pm.collectionVariables.get(\"jwtSecret\") || pm.environment.get(\"jwtSecret\");",
           "",
           "// Función para codificar en Base64URL",
           "function base64url(source) {",
@@ -206,18 +186,23 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "https://rapidgo-api.azure-api.net",
+      "value": "https://apim-rapidgo-gateway.azure-api.net/api",
       "description": "URL base de Azure API Management"
     },
     {
       "key": "jwtSecret",
-      "value": "super-secret-key-rapidgo-2026",
+      "value": "jwt_secret_dummy",
       "description": "Secreto utilizado para firmar el token JWT. Debe coincidir con la política de APIM."
     },
     {
       "key": "jwtToken",
       "value": "",
       "description": "El token JWT que se auto-genera mediante el script Pre-request"
+    },
+    {
+      "key": "subscriptionKey",
+      "value": "PEGAR_AQUI_TU_LLAVE_DE_AZURE",
+      "description": "Llave de suscripción del producto RapidGo en APIM"
     }
   ]
 }

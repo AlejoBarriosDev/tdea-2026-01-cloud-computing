@@ -21,6 +21,32 @@ resource "azurerm_api_management_api" "rapidgo_api" {
   path                = "api"
   protocols           = ["https"]
   service_url         = "https://${var.function_default_hostname}/api"
+  subscription_required = true
+}
+
+resource "azurerm_api_management_product" "rapidgo_product" {
+  product_id            = "rapidgo-services"
+  api_management_name   = azurerm_api_management.apim.name
+  resource_group_name   = var.resource_group_name
+  display_name          = "RapidGo Services"
+  subscription_required = true
+  approval_required     = false
+  published             = true
+}
+
+resource "azurerm_api_management_product_api" "rapidgo_product_api" {
+  api_name            = azurerm_api_management_api.rapidgo_api.name
+  product_id          = azurerm_api_management_product.rapidgo_product.product_id
+  api_management_name = azurerm_api_management.apim.name
+  resource_group_name = var.resource_group_name
+}
+
+resource "azurerm_api_management_subscription" "rapidgo_sub" {
+  api_management_name = azurerm_api_management.apim.name
+  resource_group_name = var.resource_group_name
+  product_id          = azurerm_api_management_product.rapidgo_product.id
+  display_name        = "RapidGo App Subscription"
+  state               = "active"
 }
 
 resource "azurerm_api_management_named_value" "jwt_secret" {
