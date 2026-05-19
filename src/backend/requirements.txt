@@ -1,4 +1,4 @@
-# Final attempt with health check and fixed encoding
+# Fixed Flex Consumption settings
 azure-functions
 azure-cosmos
 azure-storage-blob
