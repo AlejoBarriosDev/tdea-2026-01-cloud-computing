@@ -18,3 +18,13 @@ variable "jwt_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "app_insights_instrumentation_key" {
+  description = "Application Insights Instrumentation Key"
+  type        = string
+}
+
+variable "app_insights_id" {
+  description = "Application Insights Resource ID"
+  type        = string
+}

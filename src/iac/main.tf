@@ -41,4 +41,6 @@ module "api_management" {
   location                  = data.azurerm_resource_group.rg.location
   function_default_hostname = module.functions.default_hostname
   jwt_secret                = var.jwt_secret
+  app_insights_instrumentation_key = module.functions.app_insights_instrumentation_key
+  app_insights_id                  = module.functions.app_insights_id
 }
