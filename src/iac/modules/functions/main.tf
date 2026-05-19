@@ -33,6 +33,10 @@ resource "azurerm_linux_function_app" "func_app" {
   site_config {
     application_insights_key               = azurerm_application_insights.app_insights.instrumentation_key
     application_insights_connection_string = azurerm_application_insights.app_insights.connection_string
+    
+    application_stack {
+      python_version = "3.11"
+    }
   }
 
   app_settings = {
