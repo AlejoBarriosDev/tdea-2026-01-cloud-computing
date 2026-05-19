@@ -40,7 +40,6 @@ resource "azurerm_linux_function_app" "func_app" {
   }
 
   app_settings = {
-    "FUNCTIONS_WORKER_RUNTIME"           = "python"
     "COSMOS_DB_CONNECTION_STRING"        = var.cosmos_db_connection_string
     "BLOB_STORAGE_CONNECTION_STRING"     = var.blob_storage_connection_string
     "NOTIFICATION_HUB_CONNECTION_STRING" = var.notification_hub_connection_string

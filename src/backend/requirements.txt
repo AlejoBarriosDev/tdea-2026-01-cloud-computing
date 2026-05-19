@@ -1,4 +1,4 @@
-# Fixed Flex Consumption settings
+# Triggering final deployment after clearing all unsupported settings
 azure-functions
 azure-cosmos
 azure-storage-blob
