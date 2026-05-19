@@ -1,5 +1,6 @@
 azure-functions
 azure-cosmos
 azure-storage-blob
-azure-notificationhubs
+requests
+azure-identity
 pytest
