@@ -1,4 +1,4 @@
-# Triggering deployment after infra fix
+# Final attempt with health check and fixed encoding
 azure-functions
 azure-cosmos
 azure-storage-blob
