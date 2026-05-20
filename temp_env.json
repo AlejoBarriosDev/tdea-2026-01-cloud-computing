@@ -1,0 +1,22 @@
+{
+  "id": "efce18bd-23ab-4d14-b218-7af84b7c0544",
+  "name": "RapidGo-Dev",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "https://apim-rapidgo-gateway.azure-api.net/api",
+      "enabled": true
+    },
+    {
+      "key": "jwtSecret",
+      "value": "jwt_secret_dummy",
+      "enabled": true
+    },
+    {
+      "key": "subscriptionKey",
+      "value": "80820f490cf742cc87e85681cbd84a96",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment"
+}
