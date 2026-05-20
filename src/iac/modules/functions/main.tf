@@ -20,6 +20,10 @@ resource "azurerm_service_plan" "func_plan" {
   location            = var.location
   os_type             = "Linux"
   sku_name            = "Y1" 
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "azurerm_linux_function_app" "func_app" {
