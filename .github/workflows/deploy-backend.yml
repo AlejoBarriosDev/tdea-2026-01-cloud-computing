@@ -46,10 +46,17 @@ jobs:
           python -m unittest discover tests
           popd
 
-      - name: 'Deploy to Azure Functions'
-        uses: Azure/functions-action@v1
-        with:
-          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-          package: './${{ env.WORKING_DIRECTORY }}'
-          scm-do-build-during-deployment: true
-          enable-oryx-build: true
+      - name: 'Zip and Deploy to Azure Functions via Kudu CLI'
+        shell: bash
+        run: |
+          # Crear un paquete zip limpio con la aplicación
+          cd '${{ env.WORKING_DIRECTORY }}'
+          zip -r ../../deploy.zip . -x "*.pytest_cache*" -x "*__pycache__*" -x "*.venv*" -x "*.python_packages*" -x "tests*"
+          cd ../..
+          
+          # Desplegar usando az cli con build remoto para compilar dependencias en el host de Azure
+          az functionapp deployment source config-zip \
+            -g 'serverless_backend_application_mobile' \
+            -n '${{ env.AZURE_FUNCTIONAPP_NAME }}' \
+            --src 'deploy.zip' \
+            --build-remote true
