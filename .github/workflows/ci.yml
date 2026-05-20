@@ -14,6 +14,11 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  AZURE_FUNCTIONAPP_NAME: 'func-rapidgo-backend'
+  PYTHON_VERSION: '3.11'
+  WORKING_DIRECTORY: 'src/backend'
+
 jobs:
   terraform:
     name: 'Terraform'
@@ -59,3 +64,55 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false
+
+  deploy-backend:
+    name: 'Deploy Backend'
+    needs: terraform
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: tdea-2026-01-cloud-computing
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@v4
+
+      - name: 'Az CLI login'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 'Install dependencies and run tests'
+        shell: bash
+        run: |
+          pushd './${{ env.WORKING_DIRECTORY }}'
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # Ejecutar pruebas unitarias antes de desplegar
+          python -m unittest discover tests
+          popd
+
+      - name: 'Zip and Deploy to Azure Functions'
+        shell: bash
+        run: |
+          # Crear un paquete zip limpio con la aplicación
+          cd '${{ env.WORKING_DIRECTORY }}'
+          zip -r ../../deploy.zip . -x "*.pytest_cache*" -x "*__pycache__*" -x "*.venv*" -x "*.python_packages*" -x "tests*"
+          cd ../..
+          
+          # Desplegar usando az cli con build remoto para compilar dependencias en el host de Azure
+          # Se añade un pequeño reintento para mitigar posibles bloqueos residuales de Terraform
+          for i in {1..3}; do
+            az functionapp deployment source config-zip \
+              -g 'serverless_backend_application_mobile' \
+              -n '${{ env.AZURE_FUNCTIONAPP_NAME }}' \
+              --src 'deploy.zip' \
+              --build-remote true && break || \
+              (echo "Despliegue fallido, reintentando en 30s..." && sleep 30);
+          done
+
