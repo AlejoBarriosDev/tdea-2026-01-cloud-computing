@@ -33,7 +33,9 @@ class NotificationService:
 
     def _generate_sas_token(self, uri):
         """Genera un token SAS para autenticarse con el REST API de Notification Hubs."""
-        target_uri = quote(uri, safe='')
+        # El URI para el token SAS no debe incluir parámetros de consulta
+        base_uri = uri.split('?')[0].lower()
+        target_uri = quote(base_uri, safe='')
         expires = int(time.time() + 3600)  # Expira en 1 hora
         to_sign = f"{target_uri}\n{expires}"
         
@@ -41,7 +43,9 @@ class NotificationService:
             hmac.new(self.sas_key.encode('utf-8'), to_sign.encode('utf-8'), hashlib.sha256).digest()
         ).decode('utf-8')
         
-        return f"SharedAccessSignature sr={target_uri}&sig={quote(signature)}&se={expires}&skn={self.sas_key_name}"
+        token = f"SharedAccessSignature sr={target_uri}&sig={quote(signature)}&se={expires}&skn={self.sas_key_name}"
+        logging.debug(f"NotificationService: SAS Token generado para {base_uri}")
+        return token
 
     def notificar_cambio_estado(self, pedido_id, nuevo_estado, cliente_id):
         """
@@ -51,7 +55,7 @@ class NotificationService:
         logging.info(f"NotificationService: Preparando notificación para pedido {pedido_id}")
         
         if not self.is_enabled:
-            logging.warning("NotificationService: Notification Hubs no configurado. Simulación completada.")
+            logging.warning("NotificationService: Notification Hubs no configurado. Ignorando envío.")
             return True
 
         # Payload para FCM (Android)
@@ -70,23 +74,29 @@ class NotificationService:
         try:
             # URL para enviar notificaciones de tipo FCM (Google)
             # Formato: https://{namespace}.servicebus.windows.net/{hubName}/messages/?api-version=2015-01
-            url = f"{self.endpoint}{self.hub_name}/messages/?api-version=2015-01"
+            base_url = f"{self.endpoint}{self.hub_name}/messages/"
+            query_params = "?api-version=2015-01"
+            url = base_url + query_params
             
             headers = {
-                "Authorization": self._generate_sas_token(url),
+                "Authorization": self._generate_sas_token(base_url),
                 "Content-Type": "application/json;charset=utf-8",
                 "ServiceBusNotification-Format": "gcm" # GCM es el formato para FCM en la API REST
             }
 
+            logging.info(f"NotificationService: Enviando POST a {base_url}")
             response = requests.post(url, data=json.dumps(fcm_payload), headers=headers, timeout=10)
             
             if response.status_code in [200, 201]:
-                logging.info(f"NotificationService: API REST llamada exitosamente (Status {response.status_code})")
+                logging.info(f"NotificationService: Petición aceptada por Azure (Status {response.status_code})")
                 return True
             else:
-                logging.error(f"Error en API de Notification Hubs: {response.status_code} - {response.text}")
-                return True # Retornamos True para no bloquear el flujo
+                # El error 401 indica problemas de SAS token
+                # El error 400 indica problemas de payload o falta de configuración de PNS (que es lo que esperamos para ver '0 executions')
+                logging.error(f"NotificationService: Azure respondió con error {response.status_code}: {response.text[:200]}")
+                return True # Retornamos True para no bloquear el flujo de negocio
                 
         except Exception as e:
-            logging.error(f"Error al enviar notificación via REST: {str(e)}")
+            logging.error(f"NotificationService: Error crítico al enviar notificación: {str(e)}")
             return True
+
