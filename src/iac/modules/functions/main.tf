@@ -60,3 +60,6 @@ resource "azurerm_linux_function_app" "func_app" {
     project     = "rapidgo"
   }
 }
+
+# Reverted to Y1 Consumption to resolve Flex Consumption update issues
+
