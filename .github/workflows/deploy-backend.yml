@@ -51,3 +51,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
           package: './${{ env.WORKING_DIRECTORY }}'
+          remote-build: true
