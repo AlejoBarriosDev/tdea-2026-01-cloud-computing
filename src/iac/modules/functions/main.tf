@@ -51,6 +51,7 @@ resource "azurerm_linux_function_app" "func_app" {
     "FCM_API_KEY"                        = var.fcm_api_key
     "APNS_CERTIFICATE"                   = var.apns_certificate
     "FUNCTIONS_WORKER_RUNTIME"           = "python"
+    "SCM_DO_BUILD_DURING_DEPLOYMENT"     = "true"
     "DEPLOYMENT_STORAGE_CONNECTION_STRING" = var.blob_storage_connection_string
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
   }
