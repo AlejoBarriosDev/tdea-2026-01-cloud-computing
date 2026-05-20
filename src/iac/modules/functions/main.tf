@@ -15,11 +15,11 @@ resource "azurerm_application_insights" "app_insights" {
 }
 
 resource "azurerm_service_plan" "func_plan" {
-  name                = "ASP-serverlessbackendapplicationmob-81a0"
+  name                = "plan-rapidgo-functions"
   resource_group_name = var.resource_group_name
   location            = var.location
   os_type             = "Linux"
-  sku_name            = "FC1" 
+  sku_name            = "Y1" 
 }
 
 resource "azurerm_linux_function_app" "func_app" {
@@ -46,6 +46,7 @@ resource "azurerm_linux_function_app" "func_app" {
     "NOTIFICATION_HUB_NAME"              = var.notification_hub_name
     "FCM_API_KEY"                        = var.fcm_api_key
     "APNS_CERTIFICATE"                   = var.apns_certificate
+    "FUNCTIONS_WORKER_RUNTIME"           = "python"
     "DEPLOYMENT_STORAGE_CONNECTION_STRING" = var.blob_storage_connection_string
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.app_insights.connection_string
   }
