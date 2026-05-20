@@ -1,7 +1,7 @@
 import azure.functions as func
 from blueprints.pedidos import pedidos_bp
 
-# Inicialización de la aplicación de funciones (Ejecutándose en plan de consumo Y1 con Remote Build)
+# Inicialización de la aplicación de funciones (Ejecutándose en plan de consumo Y1 con dependencias empaquetadas)
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 # Función de salud directa para diagnóstico
