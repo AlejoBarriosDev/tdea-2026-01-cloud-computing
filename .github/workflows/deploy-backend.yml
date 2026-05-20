@@ -51,4 +51,5 @@ jobs:
         with:
           app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
           package: './${{ env.WORKING_DIRECTORY }}'
-          remote-build: true
+          scm-do-build-during-deployment: true
+          enable-oryx-build: true
