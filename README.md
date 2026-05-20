@@ -153,18 +153,36 @@ Este diagrama detalla la arquitectura interna del contenedor de Azure Functions,
 A continuación, se documentarán las evidencias visuales (capturas de pantalla) del funcionamiento de extremo a extremo:
 
 1. **Grupo de recursos en Azure:**
+   
+   Grupo de recursos desplegado en Azure.
    ![Grupo de recursos en Azure](/assets/images/resource-group.jpg)
+   Recursos desplegados en Azure.
    ![Recursos Azure](/assets/images/resources.jpg)
 2. **Logs de ejecución exitosa:**
+
+   Logs Azure Insights
    ![Logs](/assets/images/logs.jpg)
-   *(TODO)*
+   Log Registrar Pedido
+   ![Logs Registrar Pedido](/assets/images/func-registrarPedido-log.jpg)
+   Log Consultar Historial
+   ![Logs Consultar Historial](/assets/images/func-consultarHistorial-log.jpg)
+   Log Actualiza Estado
+   ![Logs Actualiza Estado](/assets/images/func-actualizarEstado-log.jpg)
 3. **Documento en Cosmos DB:**
+
+   Contenedor CosmosDB
    ![CosmosDB](/assets/images/cosmos.jpg)
+   Datos en CosmosDB
    ![CosmosDB Data](/assets/images/cosmos_data.jpg)
+   Logs en CosmosDB
+   ![CosmosDB Logs](/assets/images/cosmosdb-logs.jpg)
 4. **Notificación enviada (Notification Hubs):**
-   *(TODO)*
+   ![Notification Hubs](/assets/images/notify-log.jpg)
 5. **Pruebas de la API:**
-   *(TODO)*
+
+   Prueba de las APIs en Postman
+   ![Pruebas de la API](/assets/images/postman-run.jpg)
+
 
 
 ---
