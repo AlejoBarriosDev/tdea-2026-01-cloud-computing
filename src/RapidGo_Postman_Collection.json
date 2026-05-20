@@ -1,20 +1,67 @@
 {
   "info": {
-    "_postman_id": "a0f158f7-f2cb-431e-a54d-1673dff186df",
-    "name": "RapidGo Serverless API",
-    "description": "Colección de Postman para el backend serverless de RapidGo. Incluye las rutas para registrar un pedido, consultar historial y actualizar el estado, como fue definido en la arquitectura C4 y el caso de estudio.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "_postman_id": "b8d517e3-04f4-49c9-bb37-9d29fe5500fa",
+    "name": "RapidGo Full Scenario Suite",
+    "description": "Colección integral de pruebas para RapidGo.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "25043363"
   },
   "item": [
     {
-      "name": "Pedidos",
-      "description": "Endpoints relacionados con la gestión de pedidos",
-      "id": "12798466-3927-4225-b078-213c3eb08def",
-      "item": [
+      "name": "1. Registrar Pedido",
+      "event": [
         {
-          "name": "1. Registrar Pedido (registrarPedido)",
-          "id": "a2e5d6a2-46e3-44b8-952c-e35343bbf572",
-          "request": {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+              "var id = pm.response.json().pedidoId;",
+              "pm.collectionVariables.set(\"lastPedidoId\", id);",
+              "console.log(\"[RAPIDGO] PedidoId:\", id);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "packages": {},
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Ocp-Apim-Subscription-Key",
+            "value": "{{subscriptionKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"clienteId\": \"12345\",\r\n    \"items\": [\r\n        {\r\n            \"productoId\": \"A01\",\r\n            \"cantidad\": 1\r\n        }\r\n    ],\r\n    \"direccion\": \"Calle Test\",\r\n    \"metodoPago\": \"efectivo\"\r\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/pedidos",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "pedidos"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "1. Registrar Pedido-ok",
+          "originalRequest": {
             "method": "POST",
             "header": [
               {
@@ -23,75 +70,205 @@
               },
               {
                 "key": "Ocp-Apim-Subscription-Key",
-                "value": "{{subscriptionKey}}",
-                "type": "text"
+                "value": "{{subscriptionKey}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"clienteId\": \"12345\",\n  \"items\": [\n    {\n      \"productoId\": \"A001\",\n      \"cantidad\": 2\n    }\n  ],\n  \"direccion\": \"Calle 123 #45-67\",\n  \"metodoPago\": \"tarjeta\"\n}"
+              "raw": "{\r\n    \"clienteId\": \"12345\",\r\n    \"items\": [\r\n        {\r\n            \"productoId\": \"A01\",\r\n            \"cantidad\": 1\r\n        }\r\n    ],\r\n    \"direccion\": \"Calle Test\",\r\n    \"metodoPago\": \"efectivo\"\r\n}"
             },
-            "url": "{{baseUrl}}/pedidos"
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos"
+              ]
+            }
           },
-          "event": [
+          "status": "Created",
+          "code": 201,
+          "_postman_previewlanguage": null,
+          "header": [
             {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 201\", function () {",
-                  "    pm.response.to.have.status(201);",
-                  "});",
-                  "",
-                  "pm.test(\"Response contains pedidoId\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property('pedidoId');",
-                  "    pm.expect(jsonData.mensaje).to.eql(\"Pedido registrado exitosamente\");",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 20 May 2026 15:36:13 GMT"
+            },
+            {
+              "key": "Server",
+              "value": "Kestrel"
+            },
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Request-Context",
+              "value": "appId=cid-v1:40672624-f11c-4c65-985f-ea2eb48cdea2"
             }
           ],
-          "response": []
+          "cookie": [],
+          "body": "{\n    \"mensaje\": \"Pedido registrado exitosamente\",\n    \"pedidoId\": \"0a78c872-3798-4d54-bc26-c47c872abd64\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "2. Consultar Historial",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "var id = pm.collectionVariables.get(\"lastPedidoId\");",
+              "pm.test(\"Found in history\", () => pm.expect(pm.response.json().some(p => p.id === id)).to.be.true);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
         },
         {
-          "name": "2. Consultar Historial (consultarHistorial)",
-          "id": "8c4290d2-bd16-404f-9226-de6785c1b36f",
-          "request": {
+          "listen": "prerequest",
+          "script": {
+            "packages": {},
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Ocp-Apim-Subscription-Key",
+            "value": "{{subscriptionKey}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/pedidos?clienteId=12345",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "pedidos"
+          ],
+          "query": [
+            {
+              "key": "clienteId",
+              "value": "12345"
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "2. Consultar Historial-ok",
+          "originalRequest": {
             "method": "GET",
             "header": [
               {
                 "key": "Ocp-Apim-Subscription-Key",
-                "value": "{{subscriptionKey}}",
-                "type": "text"
+                "value": "{{subscriptionKey}}"
               }
             ],
-            "url": "{{baseUrl}}/pedidos?clienteId=12345"
+            "url": {
+              "raw": "{{baseUrl}}/pedidos?clienteId=12345",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos"
+              ],
+              "query": [
+                {
+                  "key": "clienteId",
+                  "value": "12345"
+                }
+              ]
+            }
           },
-          "event": [
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
             {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Response is an array\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.be.an('array');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 20 May 2026 15:36:38 GMT"
+            },
+            {
+              "key": "Server",
+              "value": "Kestrel"
+            },
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Request-Context",
+              "value": "appId=cid-v1:40672624-f11c-4c65-985f-ea2eb48cdea2"
             }
           ],
-          "response": []
-        },
+          "cookie": [],
+          "body": "[\n    {\n        \"clienteId\": \"12345\",\n        \"items\": [\n            {\n                \"productoId\": \"A001\",\n                \"cantidad\": 2\n            }\n        ],\n        \"direccion\": \"Calle 123 #45-67\",\n        \"metodoPago\": \"tarjeta\",\n        \"id\": \"97f87e90-b8dc-4f6c-8edf-d4dc4c6618bb\",\n        \"estado\": \"entregado\",\n        \"fechaCreacion\": \"2026-05-19T15:13:48.302524\",\n        \"_rid\": \"-EdHAIVZ87kDAAAAAAAAAA==\",\n        \"_self\": \"dbs/-EdHAA==/colls/-EdHAIVZ87k=/docs/-EdHAIVZ87kDAAAAAAAAAA==/\",\n        \"_etag\": \"\\\"23001546-0000-0800-0000-6a0c85950000\\\"\",\n        \"_attachments\": \"attachments/\",\n        \"repartidorId\": \"R-999\",\n        \"fechaActualizacion\": \"2026-05-19T15:45:24.978144\",\n        \"_ts\": 1779205525\n    },\n    {\n        \"clienteId\": \"12345\",\n        \"items\": [\n            {\n                \"productoId\": \"A001\",\n                \"cantidad\": 2\n            }\n        ],\n        \"direccion\": \"Calle 123 #45-67\",\n        \"metodoPago\": \"tarjeta\",\n        \"id\": \"33093479-2ae7-4caa-9b7f-66b67f30800e\",\n        \"estado\": \"pendiente\",\n        \"fechaCreacion\": \"2026-05-19T15:35:22.221808\",\n        \"_rid\": \"-EdHAIVZ87kEAAAAAAAAAA==\",\n        \"_self\": \"dbs/-EdHAA==/colls/-EdHAIVZ87k=/docs/-EdHAIVZ87kEAAAAAAAAAA==/\",\n        \"_etag\": \"\\\"2300543d-0000-0800-0000-6a0c833b0000\\\"\",\n        \"_attachments\": \"attachments/\",\n        \"_ts\": 1779204923\n    },\n    {\n        \"clienteId\": \"12345\",\n        \"items\": [\n            {\n                \"productoId\": \"A001\",\n                \"cantidad\": 2\n            }\n        ],\n        \"direccion\": \"Calle 123 #45-67\",\n        \"metodoPago\": \"tarjeta\",\n        \"id\": \"5be4c9cf-6833-4d7a-8d7e-fbf4c90d2051\",\n        \"estado\": \"pendiente\",\n        \"fechaCreacion\": \"2026-05-19T15:35:23.769191\",\n        \"_rid\": \"-EdHAIVZ87kFAAAAAAAAAA==\",\n        \"_self\": \"dbs/-EdHAA==/colls/-EdHAIVZ87k=/docs/-EdHAIVZ87kFAAAAAAAAAA==/\",\n        \"_etag\": \"\\\"23005d3d-0000-0800-0000-6a0c833c0000\\\"\",\n        \"_attachments\": \"attachments/\",\n        \"_ts\": 1779204924\n    },\n    {\n        \"clienteId\": \"12345\",\n        \"items\": [\n            {\n                \"productoId\": \"A001\",\n                \"cantidad\": 2\n            }\n        ],\n        \"direccion\": \"Calle 123 #45-67\",\n        \"metodoPago\": \"tarjeta\",\n        \"id\": \"5cc11c77-240a-42fb-a910-a2d0876f7e78\",\n        \"estado\": \"pendiente\",\n        \"fechaCreacion\": \"2026-05-19T15:36:02.459036\",\n        \"_rid\": \"-EdHAIVZ87kGAAAAAAAAAA==\",\n        \"_self\": \"dbs/-EdHAA==/colls/-EdHAIVZ87k=/docs/-EdHAIVZ87kGAAAAAAAAAA==/\",\n        \"_etag\": \"\\\"2300d03d-0000-0800-0000-6a0c83620000\\\"\",\n        \"_attachments\": \"attachments/\",\n        \"_ts\": 1779204962\n    },\n    {\n        \"clienteId\": \"12345\",\n        \"items\": [\n            {\n                \"productoId\": \"A01\",\n                \"cantidad\": 1\n            }\n        ],\n        \"direccion\": \"Calle Test\",\n        \"metodoPago\": \"efectivo\",\n        \"id\": \"af9c1beb-df8d-4723-8cf3-f944cdf712db\",\n        \"estado\": \"entregado\",\n        \"fechaCreacion\": \"2026-05-19T21:38:17.176368\",\n        \"_rid\": \"-EdHAIVZ87kHAAAAAAAAAA==\",\n        \"_self\": \"dbs/-EdHAA==/colls/-EdHAIVZ87k=/docs/-EdHAIVZ87kHAAAAAAAAAA==/\",\n        \"_etag\": \"\\\"2400f03e-0000-0800-0000-6a0cd84d0000\\\"\",\n        \"_attachments\": \"attachments/\",\n        \"repartidorId\": \"R-101\",\n        \"fechaActualizacion\": \"2026-05-19T21:38:21.623413\",\n        \"_ts\": 1779226701\n    },\n    {\n        \"clienteId\": \"12345\",\n        \"items\": [\n            {\n                \"productoId\": \"A001\",\n                \"cantidad\": 2\n            }\n        ],\n        \"direccion\": \"Calle 123 #45-67\",\n        \"metodoPago\": \"tarjeta\",\n        \"id\": \"b0fbc5ab-2061-4fe5-9dea-6159894fb171\",\n        \"estado\": \"pendiente\",\n        \"fechaCreacion\": \"2026-05-20T15:20:29.363271\",\n        \"_rid\": \"-EdHAIVZ87kIAAAAAAAAAA==\",\n        \"_self\": \"dbs/-EdHAA==/colls/-EdHAIVZ87k=/docs/-EdHAIVZ87kIAAAAAAAAAA==/\",\n        \"_etag\": \"\\\"2600d552-0000-0800-0000-6a0dd13e0000\\\"\",\n        \"_attachments\": \"attachments/\",\n        \"_ts\": 1779290430\n    },\n    {\n        \"clienteId\": \"12345\",\n        \"items\": [\n            {\n                \"productoId\": \"A001\",\n                \"cantidad\": 2\n            }\n        ],\n        \"direccion\": \"Calle 123 #45-67\",\n        \"metodoPago\": \"tarjeta\",\n        \"id\": \"cae8b7a7-2923-48e5-bc2c-426fa2a85b1f\",\n        \"estado\": \"pendiente\",\n        \"fechaCreacion\": \"2026-05-20T15:31:34.208131\",\n        \"_rid\": \"-EdHAIVZ87kJAAAAAAAAAA==\",\n        \"_self\": \"dbs/-EdHAA==/colls/-EdHAIVZ87k=/docs/-EdHAIVZ87kJAAAAAAAAAA==/\",\n        \"_etag\": \"\\\"2600c25a-0000-0800-0000-6a0dd3d70000\\\"\",\n        \"_attachments\": \"attachments/\",\n        \"_ts\": 1779291095\n    },\n    {\n        \"clienteId\": \"12345\",\n        \"items\": [\n            {\n                \"productoId\": \"A01\",\n                \"cantidad\": 1\n            }\n        ],\n        \"direccion\": \"Calle Test\",\n        \"metodoPago\": \"efectivo\",\n        \"id\": \"caefa303-b26d-4898-93b9-57f787e646db\",\n        \"estado\": \"entregado\",\n        \"fechaCreacion\": \"2026-05-20T15:34:47.773377\",\n        \"_rid\": \"-EdHAIVZ87kKAAAAAAAAAA==\",\n        \"_self\": \"dbs/-EdHAA==/colls/-EdHAIVZ87k=/docs/-EdHAIVZ87kKAAAAAAAAAA==/\",\n        \"_etag\": \"\\\"2600035d-0000-0800-0000-6a0dd4990000\\\"\",\n        \"_attachments\": \"attachments/\",\n        \"repartidorId\": \"R-101\",\n        \"fechaActualizacion\": \"2026-05-20T15:34:49.551885\",\n        \"_ts\": 1779291289\n    },\n    {\n        \"clienteId\": \"12345\",\n        \"items\": [\n            {\n                \"productoId\": \"A01\",\n                \"cantidad\": 1\n            }\n        ],\n        \"direccion\": \"Calle Test\",\n        \"metodoPago\": \"efectivo\",\n        \"id\": \"0a78c872-3798-4d54-bc26-c47c872abd64\",\n        \"estado\": \"pendiente\",\n        \"fechaCreacion\": \"2026-05-20T15:36:13.880991\",\n        \"_rid\": \"-EdHAIVZ87kLAAAAAAAAAA==\",\n        \"_self\": \"dbs/-EdHAA==/colls/-EdHAIVZ87k=/docs/-EdHAIVZ87kLAAAAAAAAAA==/\",\n        \"_etag\": \"\\\"2600d15d-0000-0800-0000-6a0dd4ed0000\\\"\",\n        \"_attachments\": \"attachments/\",\n        \"_ts\": 1779291373\n    }\n]"
+        }
+      ]
+    },
+    {
+      "name": "3. Actualizar a En Camino",
+      "event": [
         {
-          "name": "3a. Actualizar Estado (Solo Estado)",
-          "id": "bd042a40-a363-4612-ae6d-167384b98054",
-          "request": {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Notified\", () => pm.expect(pm.response.json().notificado).to.be.true);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Ocp-Apim-Subscription-Key",
+            "value": "{{subscriptionKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"estado\": \"en camino\",\r\n    \"repartidorId\": \"R-101\"\r\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/pedidos/{{lastPedidoId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "pedidos",
+            "{{lastPedidoId}}"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "3. Actualizar a En Camino-ok",
+          "originalRequest": {
             "method": "PUT",
             "header": [
               {
@@ -100,41 +277,101 @@
               },
               {
                 "key": "Ocp-Apim-Subscription-Key",
-                "value": "{{subscriptionKey}}",
-                "type": "text"
+                "value": "{{subscriptionKey}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"estado\": \"en camino\",\n  \"repartidorId\": \"R-999\"\n}"
+              "raw": "{\r\n    \"estado\": \"en camino\",\r\n    \"repartidorId\": \"R-101\"\r\n}"
             },
-            "url": "{{baseUrl}}/pedidos/:id"
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/{{lastPedidoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos",
+                "{{lastPedidoId}}"
+              ]
+            }
           },
-          "event": [
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
             {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Verify update message\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData.mensaje).to.include(\"notificación enviada\");",
-                  "    pm.expect(jsonData.notificado).to.be.true;",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 20 May 2026 15:36:51 GMT"
+            },
+            {
+              "key": "Server",
+              "value": "Kestrel"
+            },
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Request-Context",
+              "value": "appId=cid-v1:40672624-f11c-4c65-985f-ea2eb48cdea2"
             }
           ],
-          "response": []
-        },
+          "cookie": [],
+          "body": "{\n    \"mensaje\": \"Actualizado exitosamente y notificación enviada\",\n    \"pedidoId\": \"0a78c872-3798-4d54-bc26-c47c872abd64\",\n    \"notificado\": true,\n    \"urlEvidencia\": null\n}"
+        }
+      ]
+    },
+    {
+      "name": "4. Actualizar a Entregado con Evidencia",
+      "event": [
         {
-          "name": "3b. Subir Evidencia (Estado + Imagen)",
-          "id": "e3b8b1a4-1234-4a5b-8c6d-9e0f1a2b3c4d",
-          "request": {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Evidence Uploaded\", () => pm.expect(pm.response.json().urlEvidencia).to.not.be.null);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Ocp-Apim-Subscription-Key",
+            "value": "{{subscriptionKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"estado\": \"entregado\",\r\n    \"repartidorId\": \"R-101\",\r\n    \"evidenciaBase64\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==\"\r\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/pedidos/{{lastPedidoId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "pedidos",
+            "{{lastPedidoId}}"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "4. Actualizar a Entregado con Evidencia-ok",
+          "originalRequest": {
             "method": "PUT",
             "header": [
               {
@@ -143,36 +380,51 @@
               },
               {
                 "key": "Ocp-Apim-Subscription-Key",
-                "value": "{{subscriptionKey}}",
-                "type": "text"
+                "value": "{{subscriptionKey}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"estado\": \"entregado\",\n  \"repartidorId\": \"R-999\",\n  \"evidenciaBase64\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==\"\n}"
+              "raw": "{\r\n    \"estado\": \"entregado\",\r\n    \"repartidorId\": \"R-101\",\r\n    \"evidenciaBase64\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==\"\r\n}"
             },
-            "url": "{{baseUrl}}/pedidos/:id"
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/{{lastPedidoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos",
+                "{{lastPedidoId}}"
+              ]
+            }
           },
-          "event": [
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
             {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Verify upload message\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData.mensaje).to.include(\"notificación enviada\");",
-                  "    pm.expect(jsonData.urlEvidencia).to.not.be.null;",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 20 May 2026 15:37:10 GMT"
+            },
+            {
+              "key": "Server",
+              "value": "Kestrel"
+            },
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Request-Context",
+              "value": "appId=cid-v1:40672624-f11c-4c65-985f-ea2eb48cdea2"
             }
           ],
-          "response": []
+          "cookie": [],
+          "body": "{\n    \"mensaje\": \"Actualizado exitosamente y notificación enviada\",\n    \"pedidoId\": \"0a78c872-3798-4d54-bc26-c47c872abd64\",\n    \"notificado\": true,\n    \"urlEvidencia\": \"https://strapidgobackenddata.blob.core.windows.net/comprobantes/evidencia_0a78c872-3798-4d54-bc26-c47c872abd64.jpg\"\n}"
         }
       ]
     }
@@ -192,6 +444,7 @@
       "listen": "prerequest",
       "script": {
         "type": "text/javascript",
+        "requests": {},
         "exec": [
           "// Generación automática de JWT para pruebas de API Management",
           "var header = {",
@@ -224,28 +477,38 @@
           "console.log(\"JWT generado:\", jwt);"
         ]
       }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "requests": {},
+        "exec": [
+          "console.log(`[RAPIDGO] Executed: ${pm.info.requestName} - Status: ${pm.response.code}`);"
+        ]
+      }
     }
   ],
   "variable": [
     {
       "key": "baseUrl",
-      "value": "https://apim-rapidgo-gateway.azure-api.net/api",
-      "description": "URL base de Azure API Management"
+      "value": "https://apim-rapidgo-gateway.azure-api.net/api"
     },
     {
       "key": "jwtSecret",
-      "value": "jwt_secret_dummy",
-      "description": "Secreto utilizado para firmar el token JWT. Debe coincidir con la política de APIM."
+      "value": "jwt_secret_dummy"
     },
     {
       "key": "jwtToken",
-      "value": "",
-      "description": "El token JWT que se auto-genera mediante el script Pre-request"
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NSIsIm5hbWUiOiJSYXBpZEdvIFRlc3QgVXNlciIsImV4cCI6MTc3OTI5NDA0Mn0.P6dU4U2WrQlGu1PFWpUGEdplR8yDuLsbsQMqdw6kFZE"
     },
     {
       "key": "subscriptionKey",
-      "value": "80820f490cf742cc87e85681cbd84a96",
-      "description": "Llave de suscripción del producto RapidGo en APIM"
+      "value": "80820f490cf742cc87e85681cbd84a96"
+    },
+    {
+      "key": "lastPedidoId",
+      "value": ""
     }
   ]
 }
