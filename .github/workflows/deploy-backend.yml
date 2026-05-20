@@ -44,9 +44,6 @@ jobs:
           pip install -r requirements.txt
           # Ejecutar pruebas unitarias antes de desplegar
           python -m unittest discover tests
-          
-          # Instalar dependencias en el directorio del paquete para despliegue
-          pip install -r requirements.txt --target="./.python_packages/lib/site-packages"
           popd
 
       - name: 'Deploy to Azure Functions'
@@ -54,4 +51,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
           package: './${{ env.WORKING_DIRECTORY }}'
-          remote-build: false
+          remote-build: true
