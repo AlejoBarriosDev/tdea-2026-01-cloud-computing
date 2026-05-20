@@ -89,7 +89,7 @@
           "response": []
         },
         {
-          "name": "3. Actualizar Estado (actualizarEstado)",
+          "name": "3a. Actualizar Estado (Solo Estado)",
           "id": "bd042a40-a363-4612-ae6d-167384b98054",
           "request": {
             "method": "PUT",
@@ -130,6 +130,49 @@
             }
           ],
           "response": []
+        },
+        {
+          "name": "3b. Subir Evidencia (Estado + Imagen)",
+          "id": "e3b8b1a4-1234-4a5b-8c6d-9e0f1a2b3c4d",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"entregado\",\n  \"repartidorId\": \"R-999\",\n  \"evidenciaBase64\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==\"\n}"
+            },
+            "url": "{{baseUrl}}/pedidos/:id"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Verify upload message\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.mensaje).to.include(\"notificación enviada\");",
+                  "    pm.expect(jsonData.urlEvidencia).to.not.be.null;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
         }
       ]
     }
@@ -162,13 +205,13 @@
           "};",
           "var secret = pm.collectionVariables.get(\"jwtSecret\") || pm.environment.get(\"jwtSecret\");",
           "",
-          "// Función para codificar en Base64URL",
+          "// Función para codificar en Base64URL sin usar rstrip manual (Postman native)",
           "function base64url(source) {",
           "    var encodedSource = CryptoJS.enc.Base64.stringify(source);",
-          "    encodedSource = encodedSource.replace(/=+$/, '');",
-          "    encodedSource = encodedSource.replace(/\\+/g, '-');",
-          "    encodedSource = encodedSource.replace(/\\//g, '_');",
-          "    return encodedSource;",
+          "    var res = encodedSource.split('=')[0]; // Remove padding",
+          "    res = res.replace(/\\+/g, '-');",
+          "    res = res.replace(/\\//g, '_');",
+          "    return res;",
           "}",
           "",
           "var encodedHeader = base64url(CryptoJS.enc.Utf8.parse(JSON.stringify(header)));",
@@ -178,7 +221,7 @@
           "",
           "var jwt = encodedHeader + \".\" + encodedPayload + \".\" + encodedSignature;",
           "pm.collectionVariables.set(\"jwtToken\", jwt);",
-          "console.log(\"JWT generado automáticamente y asignado a la variable jwtToken\");"
+          "console.log(\"JWT generado:\", jwt);"
         ]
       }
     }
@@ -201,7 +244,7 @@
     },
     {
       "key": "subscriptionKey",
-      "value": "PEGAR_AQUI_TU_LLAVE_DE_AZURE",
+      "value": "80820f490cf742cc87e85681cbd84a96",
       "description": "Llave de suscripción del producto RapidGo en APIM"
     }
   ]

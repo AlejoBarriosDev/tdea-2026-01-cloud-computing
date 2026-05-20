@@ -51,6 +51,12 @@ Este diagrama detalla la arquitectura interna del contenedor de Azure Functions,
 * **`procesarPago` (Internal Service):** Componente de integración interno que aísla la comunicación transaccional. Realiza peticiones JSON/HTTP hacia el sistema de software externo de la Pasarela de Pagos para efectuar los cobros.
 * **`notificarCliente` (Internal Helper):** Servicio auxiliar invocado internamente tras la actualización de un estado. Construye el payload push y utiliza el Azure SDK para delegar el envío del mensaje al orquestador Azure Notification Hubs.
 
+**Componentes de Soporte e Infraestructura (No visibles en diagrama):**
+* **Application Insights / Log Analytics:** Componentes de telemetría esenciales para el monitoreo de errores, logs y rendimiento en tiempo real.
+* **App Service Plan:** Motor de cómputo (servidor subyacente) que respalda la ejecución elástica de las Functions.
+* **Storage Account (Rol Técnico):** Aunque el almacenamiento de blobs es visible en el C2 para el negocio, en el portal de Azure este recurso también cumple la función obligatoria de almacenar el código, las llaves y el estado interno de la Function App.
+* **Namespaces:** Contenedores administrativos necesarios para la gestión y escalado de servicios como Notification Hubs.
+
 ![C3](assets/images/C3.svg)
 [Diagrama C3](assets/C4_Diagrams.drawio)
 
@@ -150,9 +156,11 @@ A continuación, se documentarán las evidencias visuales (capturas de pantalla)
    ![Grupo de recursos en Azure](/assets/images/resource-group.jpg)
    ![Recursos Azure](/assets/images/resources.jpg)
 2. **Logs de ejecución exitosa:**
+   ![Logs](/assets/images/logs.jpg)
    *(TODO)*
 3. **Documento en Cosmos DB:**
-   *(TODO)*
+   ![CosmosDB](/assets/images/cosmos.jpg)
+   ![CosmosDB Data](/assets/images/cosmos_data.jpg)
 4. **Notificación enviada (Notification Hubs):**
    *(TODO)*
 5. **Pruebas de la API:**
@@ -176,20 +184,36 @@ Para activar el ciclo de vida automatizado del backend, siga estos pasos:
 
 Durante el diseño y ejecución del piloto serverless de RapidGo, se identificaron y superaron importantes retos técnicos que definen las mejores prácticas para futuros despliegues:
 
-1. **Restricciones de Suscripción para la IaC:** 
+1. **Diferenciación entre Arquitectura Lógica y Física:** 
+   Se identificó una discrepancia entre el número de componentes en los diagramas C4 y los recursos visibles en la consola de Azure. Esto se debe a que los diagramas representan la arquitectura **lógica** (los servicios de negocio), mientras que el portal muestra la arquitectura **física** y de soporte. Por ejemplo, un mismo recurso como la *Storage Account* aparece en los diagramas por su valor de negocio (Blob Storage), pero en Azure cumple roles técnicos adicionales (almacenamiento de código y logs) que son necesarios para la operabilidad pero se omiten en los diagramas de alto nivel por simplicidad.
+
+2. **Restricciones de Suscripción para la IaC:** 
    Debido a las limitaciones inherentes de una suscripción de estudiante (Azure for Students), la implementación de Infraestructura como Código mediante Terraform no pudo realizarse con un `Service Principal` tradicional. Esto forzó a utilizar la sesión local autenticada directamente o una `Managed Identity` (identidad administrada) para la ejecución segura del despliegue, demostrando adaptabilidad en entornos con permisos restringidos.
 
-2. **Manejo de Capacidad y Latencia en Capa Gratuita (Free Tier):** 
+3. **Manejo de Capacidad y Latencia en Capa Gratuita (Free Tier):** 
    Se experimentaron errores de `ServiceUnavailable` al intentar provisionar **Azure Cosmos DB** (Free Tier) con redundancia de zona (Availability Zones) en la región **East US**. La limitación de capacidad física para recursos gratuitos obligó a desactivar la redundancia de zona (`zone_redundant = false`) y a explorar regiones alternas como `East US 2` o `Brazil South`. Esto resalta la importancia de equilibrar el ahorro de costos frente a la posible penalidad de latencia al ubicar servicios interdependientes (Functions y DB) en diferentes datacenters.
 
-3. **Gestión de Secretos sin Alterar la Arquitectura (Key Vault):**
+4. **Gestión de Secretos sin Alterar la Arquitectura (Key Vault):**
    A pesar de la necesidad de inyectar credenciales sensibles (como los certificados y llaves para FCM/APNs en Notification Hubs), se decidió **no implementar Azure Key Vault**. La inclusión de Key Vault habría agregado complejidad operativa al piloto y modificado la estructura C2/C3 ya definida y aprobada. Como mitigación segura, se utilizaron variables marcadas como sensibles (`sensitive = true`) nativas en Terraform, logrando que los secretos se pasen e inyecten de forma segura a las variables de entorno de Azure Functions durante el despliegue sin quemarlas en el código fuente.
 
-4. **Sincronización de Infraestructura Híbrida (Drift Resolution):** 
+5. **Sincronización de Infraestructura Híbrida (Drift Resolution):** 
    Ante fallos críticos de aprovisionamiento automatizado debido a cuotas de región, se implementó una estrategia exitosa de creación manual controlada seguida de una sincronización forzada hacia el estado de Terraform (`terraform import`). Este proceso permitió recuperar la gestión del ciclo de vida de recursos críticos (CosmosDB en `West US 2` y Function App en plan `Flex Consumption`) sin destruir la infraestructura existente ni comprometer los secretos almacenados en GitHub Actions. Esta experiencia demuestra que la infraestructura como código (IaC) puede coexistir y recuperarse de intervenciones manuales necesarias en entornos de nube con restricciones dinámicas de capacidad.
 
-5. **Estrategia de Pruebas en Entornos Serverless:**
+6. **Estrategia de Pruebas en Entornos Serverless:**
    Para garantizar la calidad del software sin incurrir en costos de ejecución innecesarios durante el desarrollo, se implementó una estrategia de pruebas en dos niveles. Primero, **pruebas unitarias** utilizando `unittest.mock` para simular las interacciones con Azure Cosmos DB, permitiendo validar la lógica de negocio de forma aislada y rápida en el entorno local. Segundo, se enriqueció la **Colección de Postman** con scripts de prueba automatizados que verifican los contratos de la API y los códigos de respuesta (`200 OK`, `201 Created`). Esta combinación asegura que el backend sea robusto y cumpla con las expectativas antes de su despliegue final en el entorno de producción de Azure.
 
-6. **Arquitectura Modular y Automatización (Refactorización y CI/CD):**
-   Para evitar la acumulación de deuda técnica (código espagueti), el backend se reestructuró utilizando una arquitectura modular basada en **Azure Functions Blueprints** y capas de **Servicios**. Esta separación de responsabilidades (Separation of Concerns) facilita el mantenimiento y la escalabilidad del sistema a largo plazo. Complementariamente, se integró un pipeline de **GitHub Actions** que automatiza completamente el ciclo de vida del código: ante cada actualización en la rama principal, el sistema ejecuta automáticamente las pruebas unitarias y, solo si estas son exitosas, procede con el despliegue automático hacia Azure Functions. Esta sinergia entre infraestructura como código (Terraform) y despliegue continuo (CI/CD) representa el estándar de oro para el desarrollo ágil de aplicaciones serverless modernas en la nube.
+7. Arquitectura Modular y Automatización (Refactorización y CI/CD):
+   Para evitar la acumulación de deuda técnica (código espagueti), el backend se reestructuró utilizando una arquitectura modular basada en **Azure Functions Blueprints** y capas de **Servicios**. Esta separación de responsabilidades (Separation of Concerns) facilita el mantenimiento y la escalabilidad del sistema a largo plazo. Complementariamente, se integró un pipeline de **GitHub Actions** que automatiza completamente el ciclo de vida del código: ante cada actualización en la rama principal, el sistema ejecuta automáticamente las pruebas unitarias y, solo si estas son exitosas, procede con el despliegue automático hacia Azure Functions. Esta sinergia entre infraestructura como código (Terraform) y despliegue continuo (CI/CD) representa el estándar de oro para el desarrollo ágil de aplicaciones serverless modernas en la nube.
+
+8. **Integración Real de Notificaciones y Evidencias de Ejecución:**
+   Se superó la limitación de las notificaciones simuladas mediante la integración real con **Azure Notification Hubs**. Ante la incompatibilidad del SDK oficial con ciertos entornos de CI/CD (Python 3.11), se implementó una solución robusta utilizando la **API REST de Azure**. Esto permite que el backend realice llamadas auténticas al Hub (broadcast de FCM), lo que garantiza que las métricas de "Incoming Messages" se registren en el portal de Azure, sirviendo como evidencia técnica irrefutable de que el componente de notificaciones está operando y enlazado con el flujo de pedidos.
+
+9. **Observabilidad Centralizada y Monitoreo Full-Stack:**
+   Se implementó una estrategia de monitoreo integral mediante **Application Insights** y **Log Analytics**. A través de IaC (Terraform), se configuró la captura automática de trazas tanto para la lógica de negocio en Azure Functions como para el tráfico de red en **Azure API Management**. Esta centralización permite a los administradores diagnosticar errores, medir latencias y auditar peticiones/respuestas desde un único panel, eliminando la necesidad de revisar logs aislados por cada servicio y mejorando drásticamente el tiempo de respuesta ante incidentes (MTTR).
+
+10. **Desafíos Técnicos del Plan Flex Consumption:**
+    El despliegue en el nuevo plan **Azure Functions Flex Consumption** reveló restricciones críticas de configuración:
+    * **Restricciones de App Settings:** Se identificó que variables estándar como `FUNCTIONS_WORKER_RUNTIME` o `SCM_DO_BUILD_DURING_DEPLOYMENT` están prohibidas en este SKU y causan fallos de despliegue (`InvalidAppSettingsException`). 
+    * **Sensibilidad a la Codificación:** Se descubrió que el runtime de Python en Linux es extremadamente sensible a caracteres nulos (null bytes) en archivos de inicialización (`__init__.py`), lo que genera errores de sintaxis que bloquean el registro de funciones.
+    * **Sincronización de Triggers:** Ante desfases entre la infraestructura y el código, se validó que el despliegue mediante paquetes ZIP (`config-zip`) es la forma más fiable de forzar el registro de rutas, garantizando que el sistema pase de un estado 404 a operativo de forma inmediata.
+
